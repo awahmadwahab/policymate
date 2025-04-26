@@ -49,8 +49,9 @@ app.post('/api/gemini', async (req, res) => {
         return res.status(503).json({ error: 'Gemini API is not configured' });
     }
 
+    // THIS IS THE PROMPT THAT GETS SENT TO THE GEMINI API
     const prompt = `
-A user has submitted the following form data. Please generate a friendly and informative privacy policy summary based on this:
+A user has submitted the following form data. Please generate a friendly and informative privacy policy summary based on this and generate directly the policy text.
 
 Company Name: ${formData.companyName}
 Website URL: ${formData.websiteUrl}
