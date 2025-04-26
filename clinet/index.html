@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>PolicyMate</h1>
+            <p>Create a customized privacy policy for your website</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="form-container">
+            <h2>Enter Your Information</h2>
+            <form id="policyForm">
+                <div class="form-section">
+                    <h3>Company Information</h3>
+                    <div class="form-group">
+                        <label for="companyName">Company/Website Name:</label>
+                        <input type="text" id="companyName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="websiteUrl">Website URL:</label>
+                        <input type="url" id="websiteUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">Contact Email:</label>
+                        <input type="email" id="contactEmail">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Data Collection</h3>
+                    <p>What types of personal data do you collect?</p>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectName" value="name">
+                            <label for="collectName">Names</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectEmail" value="email">
+                            <label for="collectEmail">Email Addresses</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectPhone" value="phone">
+                            <label for="collectPhone">Phone Numbers</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectAddress" value="address">
+                            <label for="collectAddress">Physical Addresses</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectCookies" value="cookies">
+                            <label for="collectCookies">Cookies</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="collectIp" value="ip">
+                            <label for="collectIp">IP Addresses</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="otherData">Other data collected (specify):</label>
+                        <textarea id="otherData" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Purpose of Data Collection</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purposeService" value="service">
+                            <label for="purposeService">Provide services</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purposeCommunication" value="communication">
+                            <label for="purposeCommunication">Communication</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purposeMarketing" value="marketing">
+                            <label for="purposeMarketing">Marketing</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purposeAnalytics" value="analytics">
+                            <label for="purposeAnalytics">Analytics</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="otherPurpose">Other purposes (specify):</label>
+                        <textarea id="otherPurpose" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Data Storage</h3>
+                    <div class="form-group">
+                        <label for="storageDuration">How long do you store data?</label>
+                        <select id="storageDuration">
+                            <option value="necessary">As long as necessary</option>
+                            <option value="1year">1 year</option>
+                            <option value="2years">2 years</option>
+                            <option value="5years">5 years</option>
+                            <option value="indefinite">Indefinitely</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="storageMethod">Storage method:</label>
+                        <textarea id="storageMethod" rows="3" placeholder="Describe how you store the data (e.g., secure servers, encryption)"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Third-party Sharing</h3>
+                    <div class="form-group">
+                        <label>Do you share data with third parties?</label>
+                        <div class="radio-group">
+                            <input type="radio" id="shareYes" name="shareData" value="yes">
+                            <label for="shareYes">Yes</label>
+                            
+                            <input type="radio" id="shareNo" name="shareData" value="no" checked>
+                            <label for="shareNo">No</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="thirdPartySection" style="display: none;">
+                        <label for="thirdParties">Which third parties?</label>
+                        <textarea id="thirdParties" rows="3" placeholder="List third parties and purpose (e.g., payment processors, analytics services)"></textarea>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Generate Policy</button>
+                    <button type="reset" class="btn btn-secondary">Reset Form</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="preview-container" id="previewContainer" style="display: none;">
+            <h2>Your Privacy Policy</h2>
+            <div class="preview-actions">
+                <button id="copyBtn" class="btn btn-secondary">Copy to Clipboard</button>
+                <button id="downloadBtn" class="btn btn-primary">Download as Text</button>
+            </div>
+            <div class="policy-preview" id="policyPreview">
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>Disclaimer: This tool provides a basic privacy policy template. For legal compliance, consult with a legal professional.</p>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
