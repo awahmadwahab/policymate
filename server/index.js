@@ -1,16 +1,21 @@
+import { config } from 'dotenv';
+config(); // Load environment variables from .env file
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Use the API key from environment variables
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+    console.error('ERROR: GEMINI_API_KEY is not set in the environment variables.');
+    process.exit(1);
+}
 
 // Initialize the Gemini API client
 let genAI = null;
-if (GEMINI_API_KEY) {
-  try {
-    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    console.log('Gemini API client initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize Gemini API client:', error);
-  }
+try {
+  genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  console.log('Gemini API client initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize Gemini API client:', error);
 }
 
 export default async function handler(req, res) {

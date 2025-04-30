@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   
-    // Use the current domain for the backend API
+    // Use relative path for Vercel's serverless functions
     const SERVER_URL = '';
   
     async function handleFormSubmit(e) {
@@ -136,4 +136,3 @@ document.addEventListener('DOMContentLoaded', function () {
       document.body.removeChild(element);
     }
   });
-  
