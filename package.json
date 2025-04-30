@@ -1,0 +1,11 @@
+{
+    "name": "policymate",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "vercel dev"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "@vercel/node": "^2.15.3"
+    }
+  }
