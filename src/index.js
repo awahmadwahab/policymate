@@ -128,7 +128,12 @@ app.post('/api/generate-pdf', async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Visit http://localhost:${PORT} to access the application`);
+const effectivePort = process.env.PORT || PORT; // Use environment port if available
+app.listen(effectivePort, () => {
+  // Use the actual port the server is listening on
+  console.log(`Server running on port ${effectivePort}`); 
+  // Keep the local link for local development convenience
+  if (effectivePort === PORT) { 
+    console.log(`Visit http://localhost:${PORT} to access the application`);
+  }
 });
