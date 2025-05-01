@@ -5,9 +5,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-// Correct require paths based on file structure
-const { generatePolicy } = require('./gemini'); 
-const { generatePDF } = require('./pdf'); // Assuming pdf.js was moved to backend/utils/
+const { generatePolicy } = require('./gemini');
+const { generatePDF } = require('./pdf');
 
 // Initialize Express app
 const app = express();
@@ -21,46 +20,44 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 // Serve static files from the frontend directory
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// API Routes (relative to backend)
+// API Routes
 app.post('/api/gemini', async (req, res) => {
   try {
     const policyData = req.body;
-    
+
     // Validate required fields
     if (!policyData.websiteName || !policyData.contactEmail) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         error: 'Website name and contact email are required'
       });
     }
-    
+
     console.log('Generating policy for:', policyData.websiteName);
     const generatedPolicy = await generatePolicy(policyData);
-    
+
     // Return success response
-    res.json({ 
-      success: true, 
-      policy: generatedPolicy 
+    res.json({
+      success: true,
+      policy: generatedPolicy
     });
   } catch (error) {
     console.error('Error generating policy:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message || 'Failed to generate policy'
     });
   }
 });
 
-// PDF generation endpoint (relative to backend)
 app.post('/api/generate-pdf', async (req, res) => {
   try {
     const { html, websiteName } = req.body;
-    
+
     if (!html) {
       return res.status(400).json({ success: false, error: 'HTML content is required' });
     }
-    
-    // Add CSS styling for PDF
+
     const styledHtml = `
       <!DOCTYPE html>
       <html>
@@ -92,9 +89,6 @@ app.post('/api/generate-pdf', async (req, res) => {
           p {
             margin-bottom: 10px;
           }
-          ul, ol {
-            margin-bottom: 10px;
-          }
           .footer {
             text-align: center;
             font-size: 12px;
@@ -111,20 +105,18 @@ app.post('/api/generate-pdf', async (req, res) => {
       </body>
       </html>
     `;
-    
-    // Generate PDF
+
     const pdfBuffer = await generatePDF(styledHtml);
-    
-    // Set response headers
+
+    // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="privacy-policy-${(websiteName || 'website').toLowerCase().replace(/[^a-z0-9]/gi, '-')}.pdf"`);
-    
-    // Send the PDF
+
     res.send(pdfBuffer);
   } catch (error) {
     console.error('PDF Generation Error:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message || 'Failed to generate PDF'
     });
   }
