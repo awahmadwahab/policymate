@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       try {
         // Call API to generate policy
-        const response = await fetch('/api/gemini', {
+        const response = await fetch('https://policymate.onrender.com/api/gemini', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
           showToast('Processing', 'Generating PDF, please wait...', 'primary');
           
           // Call the server to generate PDF
-          const response = await fetch('/api/generate-pdf', {
+          const response = await fetch('https://policymate.onrender.com/api/generate-pdf', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
