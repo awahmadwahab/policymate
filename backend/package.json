@@ -4,16 +4,15 @@
     "description": "Backend for privacy policy generator",
     "main": "index.js",
     "scripts": {
-      "start": "node index.js"
+        "start": "node index.js"
     },
     "dependencies": {
-      "express": "^4.17.1",
-      "body-parser": "^1.19.0",
-      "dotenv": "^10.0.0",
-      "cors": "^2.8.5"
+        "axios": "^1.9.0",
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1"
     },
-    "devDependencies": {},
     "author": "",
     "license": "ISC"
-  }
-  
+}
