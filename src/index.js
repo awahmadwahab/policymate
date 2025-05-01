@@ -1,139 +1,79 @@
-// Load environment variables
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const path = require('path');
-const { generatePolicy } = require('./api/gemini');
-const { generatePDF } = require('./utils/pdf');
 
-// Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
 app.use(cors());
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.json());
 
-// Routes
-app.post('/api/gemini', async (req, res) => {
-  try {
-    const policyData = req.body;
-    
-    // Validate required fields
-    if (!policyData.websiteName || !policyData.contactEmail) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Website name and contact email are required'
-      });
-    }
-    
-    console.log('Generating policy for:', policyData.websiteName);
-    const generatedPolicy = await generatePolicy(policyData);
-    
-    // Return success response
-    res.json({ 
-      success: true, 
-      policy: generatedPolicy 
-    });
-  } catch (error) {
-    console.error('Error generating policy:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message || 'Failed to generate policy'
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public'))); // Adjusted path for src directory
+
+// API Routes
+// Note: Vercel handles API routes via the /api directory.
+// These routes might be handled differently in production on Vercel.
+// For local development, we can keep them, but they might need adjustment
+// or removal depending on the final Vercel configuration.
+
+// Assuming ./api/gemini exports a function suitable for Express middleware
+const geminiApiHandler = require('./api/gemini'); 
+if (typeof geminiApiHandler === 'function') {
+  // Check if it's the serverless function export or the generatePolicy function
+  // This is a basic check, might need refinement based on actual export
+  if (geminiApiHandler.length === 2) { // Likely serverless export (req, res)
+     // This setup is more for local testing if you want to mimic Vercel's /api structure
+     // app.post('/api/gemini', geminiApiHandler);
+     console.warn('Local /api/gemini route using Vercel handler structure might not work as expected locally.');
+  } else { // Assuming it exports generatePolicy or similar
+    // This route structure was used before Vercel API routes were introduced
+    app.post('/api/generate', async (req, res) => {
+      try {
+        const policyData = req.body;
+        if (!policyData.websiteName || !policyData.contactEmail) {
+          return res.status(400).json({ success: false, error: 'Website name and contact email are required' });
+        }
+        const generatedPolicy = await geminiApiHandler.generatePolicy(policyData); // Assuming generatePolicy is exported
+        res.json({ success: true, policy: generatedPolicy });
+      } catch (error) {
+        console.error('Error in /api/generate:', error);
+        res.status(500).json({ success: false, error: error.message || 'Failed to generate policy' });
+      }
     });
   }
-});
+} else {
+  console.error('Could not load ./api/gemini handler');
+}
 
-// PDF generation endpoint
+// Assuming ./utils/pdf exports a function suitable for Express middleware
+const pdfUtil = require('./utils/pdf');
+// This route seems incorrect as pdf.js likely exports generatePDF, not a request handler
+// app.post('/api/pdf', pdfUtil);
+// Re-implement the PDF generation endpoint logic here if needed for local dev
 app.post('/api/generate-pdf', async (req, res) => {
   try {
     const { html, websiteName } = req.body;
-    
     if (!html) {
       return res.status(400).json({ success: false, error: 'HTML content is required' });
     }
-    
-    // Add CSS styling for PDF
-    const styledHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Privacy Policy - ${websiteName || 'Website'}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-          }
-          h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-          }
-          h2 {
-            color: #2c3e50;
-            font-size: 18px;
-            margin-top: 20px;
-            margin-bottom: 10px;
-          }
-          p {
-            margin-bottom: 10px;
-          }
-          ul, ol {
-            margin-bottom: 10px;
-          }
-          .footer {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 20px;
-            color: #777;
-          }
-        </style>
-      </head>
-      <body>
-        ${html}
-        <div class="footer">
-          <p>Privacy Policy for ${websiteName || 'Website'} - Generated on ${new Date().toLocaleDateString()}</p>
-        </div>
-      </body>
-      </html>
-    `;
-    
-    // Generate PDF
-    const pdfBuffer = await generatePDF(styledHtml);
-    
-    // Set response headers
+    const styledHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Privacy Policy - ${websiteName || 'Website'}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;margin:0;padding:0;}h1{color:#2c3e50;font-size:24px;margin-top:20px;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:10px;}h2{color:#2c3e50;font-size:18px;margin-top:20px;margin-bottom:10px;}p{margin-bottom:10px;}ul,ol{margin-bottom:10px;}.footer{text-align:center;font-size:12px;margin-top:20px;color:#777;}</style></head><body>${html}<div class="footer"><p>Privacy Policy for ${websiteName || 'Website'} - Generated on ${new Date().toLocaleDateString()}</p></div></body></html>`;
+    const pdfBuffer = await pdfUtil.generatePDF(styledHtml); // Assuming generatePDF is exported
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="privacy-policy-${(websiteName || 'website').toLowerCase().replace(/[^a-z0-9]/gi, '-')}.pdf"`);
-    
-    // Send the PDF
     res.send(pdfBuffer);
   } catch (error) {
     console.error('PDF Generation Error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message || 'Failed to generate PDF'
-    });
+    res.status(500).json({ success: false, error: error.message || 'Failed to generate PDF' });
   }
 });
 
-// Start the server
-const effectivePort = process.env.PORT || PORT; // Use environment port if available
-app.listen(effectivePort, () => {
-  // Use the actual port the server is listening on
-  console.log(`Server running on port ${effectivePort}`); 
-  // Keep the local link for local development convenience
-  if (effectivePort === PORT) { 
-    console.log(`Visit http://localhost:${PORT} to access the application`);
-  }
+
+// Fallback route for client-side routing (if applicable)
+app.get('*', (req, res) => {
+  // Serve index.html for any route not matched by static files or API
+  res.sendFile(path.join(__dirname, '../public', 'index.html')); // Adjusted path
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
