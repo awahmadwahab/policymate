@@ -1,19 +1,32 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const API_URL = process.env.VITE_API_URL || 'http://localhost:3000/api';
-    
     const policyForm = document.getElementById('policyForm');
     const previewContainer = document.getElementById('previewContainer');
     const policyPreview = document.getElementById('policyPreview');
     const copyBtn = document.getElementById('copyBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-
-    policyForm.addEventListener('submit', async function(e) {
+    const shareDataRadios = document.querySelectorAll('input[name="shareData"]');
+    const thirdPartySection = document.getElementById('thirdPartySection');
+    
+    // Add event listeners
+    policyForm.addEventListener('submit', handleFormSubmit);
+    copyBtn.addEventListener('click', copyToClipboard);
+    downloadBtn.addEventListener('click', downloadPolicy);
+    
+    shareDataRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            thirdPartySection.style.display = (this.value === 'yes') ? 'block' : 'none';
+        });
+    });
+    
+    async function handleFormSubmit(e) {
         e.preventDefault();
         
+        // Collect form data
         const formData = {
             companyName: document.getElementById('companyName').value,
             websiteUrl: document.getElementById('websiteUrl').value,
             contactEmail: document.getElementById('contactEmail').value,
+            
             collectData: {
                 name: document.getElementById('collectName').checked,
                 email: document.getElementById('collectEmail').checked,
@@ -23,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ip: document.getElementById('collectIp').checked,
                 other: document.getElementById('otherData').value
             },
+            
             purpose: {
                 service: document.getElementById('purposeService').checked,
                 communication: document.getElementById('purposeCommunication').checked,
@@ -30,51 +44,123 @@ document.addEventListener('DOMContentLoaded', function() {
                 analytics: document.getElementById('purposeAnalytics').checked,
                 other: document.getElementById('otherPurpose').value
             },
+            
             storageDuration: document.getElementById('storageDuration').value,
             storageMethod: document.getElementById('storageMethod').value,
+            
             shareData: document.querySelector('input[name="shareData"]:checked').value,
             thirdParties: document.getElementById('thirdParties').value
         };
-
+        
         try {
-            const response = await fetch(`${API_URL}/generate-policy`, {
+            // Show loading state
+            const submitButton = policyForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner"></span> Generating...';
+            
+            // Call the API endpoint
+            const response = await fetch('/api/generate-policy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData)
             });
-
-            if (!response.ok) throw new Error('Failed to generate policy');
             
-            const policyText = await response.text();
-            policyPreview.textContent = policyText;
-            previewContainer.style.display = 'block';
-            previewContainer.scrollIntoView({ behavior: 'smooth' });
-
+            if (response.ok) {
+                const data = await response.json();
+                policyPreview.textContent = data.result;
+                previewContainer.style.display = 'block';
+                previewContainer.scrollIntoView({ behavior: 'smooth' });
+                showMessage('Privacy policy generated successfully!', 'success');
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API request failed: ${response.status} ${errorData.error || ''}`);
+            }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to generate policy. Please try again.');
+            console.error('API error:', error);
+            showMessage(`Error: ${error.message}. Please try again.`, 'error');
+        } finally {
+            // Reset button state
+            const submitButton = policyForm.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Generate Policy';
         }
-    });
-
-    copyBtn.addEventListener('click', async () => {
-        try {
-            await navigator.clipboard.writeText(policyPreview.textContent);
-            alert('Copied to clipboard!');
-        } catch (err) {
-            console.error('Failed to copy:', err);
+    }
+    
+    function showMessage(message, type) {
+        let messageElement = document.getElementById('messageAlert');
+        if (!messageElement) {
+            messageElement = document.createElement('div');
+            messageElement.id = 'messageAlert';
+            messageElement.style.position = 'fixed';
+            messageElement.style.top = '20px';
+            messageElement.style.right = '20px';
+            messageElement.style.padding = '10px 20px';
+            messageElement.style.borderRadius = '4px';
+            messageElement.style.color = 'white';
+            messageElement.style.fontWeight = 'bold';
+            messageElement.style.zIndex = '1000';
+            messageElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            document.body.appendChild(messageElement);
         }
-    });
-
-    downloadBtn.addEventListener('click', () => {
-        const text = policyPreview.textContent;
-        const blob = new Blob([text], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'privacy-policy.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
+        
+        if (type === 'success') {
+            messageElement.style.backgroundColor = 'var(--success-color, #4caf50)';
+        } else {
+            messageElement.style.backgroundColor = 'var(--danger-color, #f44336)';
+        }
+        
+        messageElement.textContent = message;
+        messageElement.style.display = 'block';
+        
+        setTimeout(() => {
+            messageElement.style.display = 'none';
+        }, 3000);
+    }
+    
+    function copyToClipboard() {
+        const policyText = policyPreview.textContent;
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(policyText)
+                .then(() => {
+                    showMessage('Policy copied to clipboard!', 'success');
+                })
+                .catch(() => {
+                    showMessage('Failed to copy. Please try again.', 'error');
+                });
+        } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = policyText;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showMessage('Policy copied to clipboard!', 'success');
+            } catch (err) {
+                showMessage('Failed to copy. Please try again.', 'error');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+    }
+    
+    function downloadPolicy() {
+        const policyText = policyPreview.textContent;
+        const companyName = document.getElementById('companyName').value || 'privacy-policy';
+        const filename = `${companyName.toLowerCase().replace(/\s+/g, '-')}-privacy-policy.txt`;
+        
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(policyText));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 });
