@@ -1,0 +1,233 @@
+:root {
+    --primary-green: #28a745; /* Bootstrap's success green */
+    --dark-bg: #212529; /* Bootstrap's dark grey */
+    --dark-card-bg: #343a40; /* Bootstrap's slightly lighter dark */
+    --light-text: #f8f9fa; /* Bootstrap's light */
+    --border-color: #495057;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    font-family: sans-serif; /* Add a default font */
+}
+
+.container {
+    background-color: var(--dark-bg); /* Ensure container bg matches body */
+}
+
+h1 {
+    color: var(--primary-green);
+}
+
+/* Card Styling */
+.card {
+    background-color: var(--dark-card-bg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem; /* Add some spacing */
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.2); /* Darker header */
+    color: var(--primary-green);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    color: var(--light-text);
+}
+
+/* Form Styling */
+.form-label {
+    color: var(--light-text);
+    margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    border: 1px solid var(--border-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25); /* Green focus ring */
+}
+
+/* Style placeholder text */
+.form-control::placeholder {
+    color: #6c757d; /* Bootstrap's secondary text color */
+    opacity: 1;
+}
+
+/* Style disabled state */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: var(--dark-card-bg);
+    opacity: 0.7;
+}
+
+/* Checkboxes and Radios */
+.form-check-input {
+    background-color: var(--dark-card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.form-check-label {
+    color: var(--light-text);
+}
+
+/* Validation Feedback */
+.invalid-feedback {
+    color: #dc3545; /* Bootstrap's danger color */
+}
+
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.was-validated .form-control:valid,
+.form-control.is-valid {
+    border-color: var(--primary-green);
+}
+
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: #fff; /* White text on green button */
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #218838; /* Darker green on hover/focus */
+    border-color: #1e7e34;
+}
+
+.btn-secondary {
+    background-color: var(--dark-card-bg);
+    border-color: var(--border-color);
+    color: var(--light-text);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: #495057;
+    border-color: #495057;
+}
+
+.btn:disabled {
+    opacity: 0.65;
+}
+
+/* Loading Indicator */
+#loadingIndicator .spinner-border {
+    color: var(--primary-green);
+}
+
+#loadingIndicator p {
+    color: var(--light-text);
+}
+
+/* Result/Error Messages */
+#resultContainer {
+    background-color: var(--dark-card-bg);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 0.375rem; /* Match card border-radius */
+    margin-top: 2rem;
+}
+
+.success-indicator {
+    color: var(--primary-green);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: #dc3545; /* Bootstrap's danger color */
+    font-weight: bold;
+}
+
+.error-message p {
+    margin-bottom: 0.5rem;
+}
+
+.error-message strong {
+     color: var(--light-text); /* Make labels readable */
+}
+
+.generated-policy {
+    line-height: 1.6;
+    white-space: pre-wrap; /* Preserve line breaks from the response */
+}
+
+.generated-policy h1,
+.generated-policy h2,
+.generated-policy h3,
+.generated-policy h4,
+.generated-policy h5,
+.generated-policy h6 {
+    color: var(--primary-green);
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+.generated-policy strong {
+    color: var(--light-text); /* Ensure bold text is light */
+}
+
+.generated-policy em {
+    color: #adb5bd; /* Slightly dimmer for emphasis */
+}
+
+/* Utility Classes from HTML */
+.d-none {
+    display: none !important;
+}
+.text-center {
+    text-align: center !important;
+}
+.my-4 {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+.mt-3 {
+    margin-top: 1rem !important;
+}
+.mt-5 {
+    margin-top: 3rem !important;
+}
+.mb-5 {
+    margin-bottom: 3rem !important;
+}
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
