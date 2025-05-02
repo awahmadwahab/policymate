@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         Format the policy with appropriate sections including: Introduction, Data Collection, Data Usage, Data Sharing, 
         User Rights, Data Security, Policy Updates, and Contact Information. Make it professional but easy to understand.
         Don't include any placeholder text like [Your Company] - use the actual website name provided. Make sure to include
-        the date of last update as today's date.
+        the date of last update as today's date.And does not include key imporvent sections
       `;
   
       // Call the Gemini 2.0 Flash API
