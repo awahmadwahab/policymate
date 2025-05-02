@@ -118,27 +118,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(formData)
             });
-            
-            const result = await response.json();
-            
+
             // Hide loading indicator
             loadingIndicator.classList.add('d-none');
-            
+
             if (response.ok) {
+                // Try parsing JSON only if response is OK
+                const result = await response.json(); // This might still fail if the OK response isn't JSON
                 // Display the generated policy with formatting
                 resultContainer.innerHTML = `
                     <div class="success-indicator">✅ Policy Generated Successfully</div>
                     <div class="generated-policy">${formatPolicyText(result.text)}</div>
                 `;
                 copyBtn.disabled = false;
-                
-                // Save form data to localStorage for future use
                 saveFormData(formData);
             } else {
+                // Handle error response - try reading as text first
+                let errorText = 'An error occurred while generating the privacy policy.';
+                try {
+                    // Attempt to get more specific error from response body
+                    const errorResult = await response.text(); // Read as text first
+                    // Try parsing as JSON *if* it looks like JSON, otherwise use the text
+                    if (errorResult && response.headers.get('content-type')?.includes('application/json')) {
+                         const jsonError = JSON.parse(errorResult);
+                         errorText = jsonError.error || errorResult; // Use specific error if available
+                    } else if (errorResult) {
+                        errorText = errorResult; // Use the raw text if not JSON
+                    } else {
+                        errorText = `Server responded with status ${response.status}`;
+                    }
+                } catch (parseError) {
+                    console.error("Could not parse error response:", parseError);
+                    errorText = `Server responded with status ${response.status}. Unable to parse error details.`;
+                }
+
                 // Show error message
                 resultContainer.innerHTML = `
                     <div class="error-message">
-                        <p>⚠️ ${result.error || 'An error occurred while generating the privacy policy.'}</p>
+                        <p>⚠️ ${errorText}</p>
                     </div>
                 `;
             }
