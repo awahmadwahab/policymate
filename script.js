@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const websiteName = document.getElementById('websiteName').value || 'Website';
             const fileName = `${websiteName.replace(/\s+/g, '-').toLowerCase()}-privacy-policy.pdf`;
             
-            if (policyElement && typeof window.jspdf !== 'undefined') {
+            if (policyElement) {
                 // Show loading state
                 const originalHtml = downloadPdfBtn.innerHTML;
                 downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating PDF...';
@@ -491,63 +491,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 setTimeout(() => {
                     try {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF({
-                            orientation: 'portrait',
-                            unit: 'mm',
-                            format: 'a4',
-                        });
-                        
-                        // Add title
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(20);
-                        doc.setTextColor(16, 185, 129); // Use accent green color
-                        doc.text(`${websiteName}: Privacy Policy`, 20, 20);
-                        
-                        // Add effective date
-                        const effectiveDate = document.getElementById('effectiveDate')?.value || 
-                                            new Date().toISOString().split('T')[0];
-                        doc.setFont("helvetica", "italic");
-                        doc.setFontSize(11);
-                        doc.setTextColor(100, 100, 100); // Gray
-                        doc.text(`Effective Date: ${effectiveDate}`, 20, 30);
-                        
-                        // Add content
-                        doc.setFont("helvetica", "normal");
-                        doc.setFontSize(12);
-                        doc.setTextColor(20, 20, 20); // Black color
-
-                        // Get plain text version of the policy
-                        const policyText = policyElement.innerText;
-                        
-                        // Split the text into lines that fit within the PDF page width
-                        const splitText = doc.splitTextToSize(policyText, 170);
-                        
-                        // Add the text to the PDF document, starting after the header
-                        doc.text(splitText, 20, 40);
-                        
-                        // Add footer with website URL
-                        const websiteUrl = document.getElementById('websiteUrl')?.value || '';
-                        if (websiteUrl) {
-                            const pageCount = doc.internal.getNumberOfPages();
-                            for (let i = 1; i <= pageCount; i++) {
-                                doc.setPage(i);
-                                doc.setFontSize(10);
-                                doc.setTextColor(100, 100, 100);
-                                doc.text(websiteUrl, 20, doc.internal.pageSize.height - 10);
-                                doc.text(`Page ${i} of ${pageCount}`, 170, doc.internal.pageSize.height - 10, { align: 'right' });
-                            }
-                        }
-                        
-                        // Save the PDF
-                        doc.save(fileName);
-                        
-                        // Show success state
-                        downloadPdfBtn.innerHTML = '<i class="fas fa-check me-1"></i> PDF Created!';
-                        setTimeout(() => {
+                        // Fix for jsPDF initialization
+                        if (typeof window.jspdf !== 'undefined') {
+                            const { jsPDF } = window.jspdf;
+                            createAndDownloadPDF(jsPDF);
+                        } else if (typeof jspdf !== 'undefined') {
+                            // Try global jspdf variable
+                            const { jsPDF } = jspdf;
+                            createAndDownloadPDF(jsPDF);
+                        } else {
+                            console.error('jsPDF library not found');
+                            showValidationError('PDF library not loaded. Please try again or refresh the page.');
                             downloadPdfBtn.innerHTML = originalHtml;
                             downloadPdfBtn.disabled = false;
-                        }, 2000);
+                        }
                         
                     } catch (error) {
                         console.error('Failed to generate PDF:', error);
@@ -556,8 +513,110 @@ document.addEventListener('DOMContentLoaded', function() {
                         showValidationError('Failed to generate PDF. Please try again.');
                     }
                 }, 300);
+                
+                // Function to create and download the PDF
+                function createAndDownloadPDF(jsPDFClass) {
+                    const doc = new jsPDFClass({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4',
+                    });
+                    
+                    // Get plain text version of the policy
+                    const policyText = policyElement.innerText;
+                    
+                    // Set up the PDF with reasonable margins
+                    const pageWidth = doc.internal.pageSize.width;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const margin = 15; // standard margins
+                    
+                    // Add title
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(18); // larger title font for better readability
+                    doc.setTextColor(16, 185, 129); // Use accent green color
+                    doc.text(`${websiteName}: Privacy Policy`, margin, margin + 5);
+                    
+                    // Add effective date
+                    const effectiveDate = document.getElementById('effectiveDate')?.value || 
+                                        new Date().toISOString().split('T')[0];
+                    doc.setFont("helvetica", "italic");
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 100, 100); // Gray
+                    doc.text(`Effective Date: ${effectiveDate}`, margin, margin + 12);
+                    
+                    // Add content with readable font size
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10); // more readable font size
+                    doc.setTextColor(20, 20, 20); // Black color
+                    
+                    // Calculate the maximum height for content on page 1
+                    const titleHeight = 20; // space taken by the title section
+                    const footerHeight = 10; // space for footer
+                    const contentHeight = pageHeight - titleHeight - footerHeight - (2 * margin);
+                    
+                    // Split the text into lines that fit within the PDF page width
+                    const contentWidth = pageWidth - (2 * margin);
+                    const splitText = doc.splitTextToSize(policyText, contentWidth);
+                    
+                    // Calculate lines per page with standard line height
+                    const lineHeight = 4.5; // standard line height in mm
+                    const maxLinesPerPage = Math.floor(contentHeight / lineHeight);
+                    
+                    // First page content
+                    const firstPageLines = splitText.slice(0, maxLinesPerPage);
+                    doc.text(firstPageLines, margin, margin + titleHeight);
+                    
+                    // Check if we need a second page
+                    if (splitText.length > maxLinesPerPage) {
+                        // Add second page
+                        doc.addPage();
+                        
+                        // Add a small header on the second page
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(12);
+                        doc.setTextColor(16, 185, 129);
+                        doc.text(`${websiteName}: Privacy Policy (Continued)`, margin, margin + 5);
+                        
+                        // Continue with the rest of the content on page 2
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(10);
+                        doc.setTextColor(20, 20, 20);
+                        
+                        const secondPageLines = splitText.slice(maxLinesPerPage);
+                        doc.text(secondPageLines, margin, margin + 15);
+                    }
+                    
+                    // Add footer with website URL and page numbers
+                    const websiteUrl = document.getElementById('websiteUrl')?.value || '';
+                    const pageCount = doc.internal.getNumberOfPages();
+                    
+                    // Add footer on each page
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFont("helvetica", "italic");
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 100, 100);
+                        
+                        if (websiteUrl) {
+                            doc.text(websiteUrl, margin, pageHeight - margin);
+                        }
+                        
+                        // Add page numbers
+                        doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin - 25, pageHeight - margin);
+                    }
+                    
+                    // Save the PDF
+                    doc.save(fileName);
+                    
+                    // Show success state
+                    downloadPdfBtn.innerHTML = '<i class="fas fa-check me-1"></i> PDF Created!';
+                    setTimeout(() => {
+                        downloadPdfBtn.innerHTML = originalHtml;
+                        downloadPdfBtn.disabled = false;
+                    }, 2000);
+                }
             } else {
-                showValidationError('Unable to generate PDF. PDF generation library not loaded or policy not generated.');
+                showValidationError('Please generate a privacy policy first before downloading as PDF.');
             }
         });
     }
