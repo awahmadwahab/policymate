@@ -1,12 +1,8 @@
-// This file should be placed in the /api folder for serverless deployment
-
 export default async function handler(req, res) {
-    // Only accept POST requests
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
   
-    // Get API keys from environment variables - updated to match .env file
     const OPENAI_API_KEY = process.env.AZURE_OPENAI_KEY;
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     const OPENAI_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT || "https://saas1748517610.openai.azure.com/";
@@ -14,7 +10,6 @@ export default async function handler(req, res) {
     const OPENAI_MODEL = "gpt-4o";
     const OPENAI_API_VERSION = "2024-04-01-preview";
     
-    // For debugging - log if we have the keys (don't log the actual keys in production)
     console.log("OpenAI API Key available:", !!OPENAI_API_KEY);
     console.log("Gemini API Key available:", !!GEMINI_API_KEY);
     
@@ -25,20 +20,66 @@ export default async function handler(req, res) {
     }
   
     try {
+      // Server-side input sanitization
+      const sanitizeInput = (input) => {
+        if (typeof input !== 'string') return input;
+        // Remove potential HTML tags
+        let sanitized = input.replace(/[<>]/g, '');
+        // Remove potential prompt injection attacks with square brackets
+        sanitized = sanitized.replace(/\[.*?\]/g, '');
+        // Remove other potential injection patterns
+        sanitized = sanitized.replace(/forget the (whole|entire) prompt/gi, '');
+        sanitized = sanitized.replace(/ignore (previous|all) instructions/gi, '');
+        sanitized = sanitized.replace(/do what i tell you/gi, '');
+        sanitized = sanitized.replace(/return only/gi, '');
+        // Limit reasonable business name length
+        return sanitized.substring(0, 100).trim();
+      };
+      
+      const sanitizeObject = (obj) => {
+        const sanitized = {};
+        for (const [key, value] of Object.entries(obj)) {
+          if (Array.isArray(value)) {
+            sanitized[key] = value.map(item => typeof item === 'string' ? sanitizeInput(item) : item);
+          } else if (typeof value === 'object' && value !== null) {
+            sanitized[key] = sanitizeObject(value);
+          } else if (typeof value === 'string') {
+            sanitized[key] = sanitizeInput(value);
+          } else {
+            sanitized[key] = value;
+          }
+        }
+        return sanitized;
+      };
+      
+      // Sanitize all incoming request data
+      const sanitizedBody = sanitizeObject(req.body);
+      
       const { 
         websiteName, 
         dataCollected, 
         dataUsage, 
         thirdPartySharing, 
         contactEmail 
-      } = req.body;
+      } = sanitizedBody;
   
-      // Validate required fields
       if (!websiteName || !dataCollected || !dataUsage || !thirdPartySharing || !contactEmail) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
-  
-      // Format data types collected as a list
+
+      // Check for potential prompt injection attacks in website name
+      if (websiteName.length < 2 || 
+          /^[<>{}\[\]]/.test(websiteName) || 
+          /forget|ignore|disregard|return|do what i/i.test(websiteName)) {
+        return res.status(400).json({ error: 'Invalid company/website name. Please provide a legitimate name.' });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contactEmail)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
       const dataTypes = dataCollected.map(type => {
         switch(type) {
           case 'contact': return 'Contact Information (Name, Email)';
@@ -51,7 +92,6 @@ export default async function handler(req, res) {
         }
       }).join(', ');
   
-      // Format third party sharing info
       let sharingInfo = '';
       switch(thirdPartySharing) {
         case 'none':
@@ -70,7 +110,6 @@ export default async function handler(req, res) {
           sharingInfo = thirdPartySharing;
       }
   
-      // Create the prompt for both APIs
       const prompt = `
         Create a comprehensive, GDPR-compliant privacy policy for a website with the following details:
         
@@ -92,11 +131,9 @@ export default async function handler(req, res) {
       
       let generatedText = '';
 
-      // Try OpenAI API first if key is available
       if (OPENAI_API_KEY) {
         try {
           console.log('Attempting to use OpenAI API...');
-          // Call the Azure OpenAI API
           const openaiResponse = await callOpenAI(
             prompt, 
             OPENAI_API_KEY, 
@@ -105,21 +142,18 @@ export default async function handler(req, res) {
             OPENAI_API_VERSION
           );
           
-          // If successful, use OpenAI's response
           generatedText = openaiResponse;
           console.log('Successfully generated content with OpenAI');
         } catch (openaiError) {
           console.error('OpenAI API error:', openaiError);
-          // If OpenAI fails and we have Gemini API key, fall back to Gemini
           if (GEMINI_API_KEY) {
             console.log('Falling back to Gemini API...');
           } else {
-            throw openaiError; // Re-throw if we can't fall back
+            throw openaiError;
           }
         }
       }
 
-      // If OpenAI didn't work or isn't available, try Gemini API
       if (!generatedText && GEMINI_API_KEY) {
         console.log('Using Gemini API...');
         generatedText = await callGemini(prompt, GEMINI_API_KEY);
@@ -131,13 +165,11 @@ export default async function handler(req, res) {
         });
       }
   
-      // Return the generated privacy policy
       return res.status(200).json({ text: generatedText });
   
     } catch (error) {
       console.error('Server error:', error);
       
-      // Return error with fallback
       return res.status(500).json({
         error: "An unexpected error occurred while generating your privacy policy.",
         fallback: `We couldn't get a response from our AI services, but here's your input: ${JSON.stringify(req.body)}`
@@ -145,9 +177,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Function to call Azure OpenAI API
   async function callOpenAI(prompt, apiKey, endpoint, deploymentName, apiVersion) {
-    // Build the correct URL with the provided deployment and API version
     const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
     
     console.log(`Calling Azure OpenAI API at: ${url}`);
@@ -187,7 +217,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Function to call Gemini API
   async function callGemini(prompt, apiKey) {
     const geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
     
@@ -221,7 +250,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Extract the generated text from Gemini's response
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
       const content = data.candidates[0].content;
       if (content.parts && content.parts[0] && content.parts[0].text) {

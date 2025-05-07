@@ -1,17 +1,17 @@
 :root {
-    --primary-color: #6366f1; /* Indigo with more vibrance */
-    --primary-hover: #4f46e5; /* Darker indigo for hover */
-    --accent-color: #10b981; /* Emerald green for accent */
-    --accent-hover: #059669; /* Darker emerald for hover */
-    --dark-bg: #0f172a; /* Slate 900 - deeper background */
-    --dark-card-bg: #1e293b; /* Slate 800 - card background */
-    --light-text: #f8fafc; /* Slate 50 - bright white text */
-    --muted-text: #94a3b8; /* Slate 400 - secondary text */
-    --border-color: #334155; /* Slate 700 - subtle borders */
-    --error-color: #ef4444; /* Red 500 */
-    --success-color: #22c55e; /* Green 500 */
-    --warning-color: #f59e0b; /* Amber 500 */
-    --info-color: #3b82f6; /* Blue 500 */
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --accent-color: #10b981;
+    --accent-hover: #059669;
+    --dark-bg: #0f172a;
+    --dark-card-bg: #1e293b;
+    --light-text: #f8fafc;
+    --muted-text: #94a3b8;
+    --border-color: #334155;
+    --error-color: #ef4444;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
 }
 
 body {
@@ -26,7 +26,6 @@ body {
     min-height: 100vh;
 }
 
-/* Enhanced background gradients */
 .main-bg-gradient {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -37,7 +36,6 @@ body {
     opacity: 1;
 }
 
-/* Random floating shapes for visual interest */
 .main-bg-gradient::before,
 .main-bg-gradient::after {
     content: '';
@@ -77,7 +75,6 @@ body {
     margin: 0 auto;
 }
 
-/* Enhanced header styling */
 .app-header {
     padding: 2.5rem 1rem 1.5rem;
     margin-bottom: 2rem;
@@ -149,7 +146,6 @@ h1, .display-5 {
     font-weight: 400;
 }
 
-/* New side-by-side layout with improved spacing */
 .form-column, .result-column {
     padding: 0 16px;
     margin-bottom: 2rem;
@@ -160,7 +156,6 @@ h1, .display-5 {
     z-index: 100;
 }
 
-/* Card styling with glassmorphism */
 .glass-card {
     background: rgba(30, 41, 59, 0.7);
     border-radius: 16px;
@@ -204,7 +199,6 @@ h1, .display-5 {
     padding: 1.5rem;
 }
 
-/* Section dividers with animated gradient */
 .section-divider {
     margin: 2.5rem 0 1.5rem;
     position: relative;
@@ -232,7 +226,6 @@ h1, .display-5 {
     border-radius: 3px;
 }
 
-/* Form elements with better spacing */
 .form-label {
     color: var(--light-text);
     margin-bottom: 0.5rem;
@@ -266,13 +259,11 @@ h1, .display-5 {
     opacity: 0.7;
 }
 
-/* Checkbox/Radio styling */
 .form-check {
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     color:white;
-
 }
 
 .form-check-input {
@@ -301,7 +292,6 @@ h1, .display-5 {
     margin-bottom: 0.5rem;
 }
 
-/* Improved button styling */
 .btn {
     font-weight: 600;
     font-size: 0.95rem;
@@ -348,14 +338,12 @@ h1, .display-5 {
     font-size: 1.05rem;
 }
 
-/* Success button animation */
 .btn-success {
     background-color: var(--success-color) !important;
     border-color: var(--success-color) !important;
     animation: successPulse 1.5s ease;
 }
 
-/* Button group styling */
 .btn-group {
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
     border-radius: 10px;
@@ -393,7 +381,6 @@ h1, .display-5 {
     background-color: #2563eb;
 }
 
-/* Progress bar styling */
 .progress {
     background-color: rgba(51, 65, 85, 0.3);
     border-radius: 8px;
@@ -406,7 +393,6 @@ h1, .display-5 {
     border-radius: 8px;
 }
 
-/* Loading indicator with enhanced animation */
 #loadingIndicator {
     padding: 3rem 0;
 }
@@ -431,7 +417,6 @@ h1, .display-5 {
     font-weight: 500;
 }
 
-/* Result container styling */
 #resultContainer {
     transition: all 0.3s ease;
     padding: 1.75rem;
@@ -530,7 +515,6 @@ h1, .display-5 {
     margin-bottom: 1.5rem;
 }
 
-/* Footer styling */
 .app-footer {
     margin-top: 4rem;
     padding: 1.5rem 0;
@@ -547,7 +531,6 @@ h1, .display-5 {
     box-shadow: 0 8px 25px rgba(15, 23, 42, 0.2);
 }
 
-/* Responsive adjustments */
 @media (max-width: 991px) {
     .form-column, 
     .result-column {
@@ -588,7 +571,6 @@ h1, .display-5 {
     }
 }
 
-/* Utility classes */
 .d-none {
     display: none !important;
 }
@@ -639,7 +621,6 @@ h1, .display-5 {
   border: 0 !important;
 }
 
-/* Animation classes for UI interactions */
 .field-fade-in {
     animation: fadeInUp 0.4s ease forwards;
 }
@@ -660,7 +641,6 @@ h1, .display-5 {
     animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* Animation Keyframes */
 @keyframes fadeIn {
     from {
         opacity: 0;

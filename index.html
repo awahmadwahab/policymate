@@ -24,25 +24,23 @@
     </header>
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <!-- Form Column (Left Side) -->
             <div class="col-lg-6 form-column">
                 <form id="policyForm" class="needs-validation glass-card" novalidate>
                     <div class="progress mb-4" style="height: 8px;">
                         <div class="progress-bar bg-accent progress-bar-striped progress-bar-animated" style="width: 0%" id="formProgress"></div>
                     </div>
-                    <!-- Section: Basic Information -->
                     <div class="section-divider mb-4"><span>Basic Information</span></div>
                     <div class="card mb-4">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="websiteName" class="form-label">Website/Company Name *</label>
-                                    <input type="text" class="form-control" id="websiteName" required>
-                                    <div class="invalid-feedback">Please provide your website name.</div>
+                                    <input type="text" class="form-control" id="websiteName" pattern="[A-Za-z0-9\s.,&'-]+" oninput="this.value = this.value.replace(/[\[\]<>{}\u2022]/g, '').replace(/forget|ignore|disregard/gi, '')" maxlength="100" required>
+                                    <div class="invalid-feedback">Please provide a valid website name (only letters, numbers and basic punctuation).</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="websiteUrl" class="form-label">Website URL *</label>
-                                    <input type="url" class="form-control" id="websiteUrl" placeholder="https://example.com" required>
+                                    <input type="url" class="form-control" id="websiteUrl" placeholder="https://example.com" maxlength="200" required>
                                     <div class="invalid-feedback">Please provide a valid URL.</div>
                                 </div>
                             </div>
@@ -59,7 +57,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Section: Data Collection -->
                     <div class="section-divider mb-4"><span>Data Collection</span></div>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -106,13 +103,13 @@
                                 </div>
                                 <div class="mt-3">
                                     <label for="otherDataCollected" class="form-label">Other Data Collected</label>
-                                    <textarea class="form-control" id="otherDataCollected" rows="2" placeholder="Specify any other data you collect"></textarea>
+                                    <textarea class="form-control" id="otherDataCollected" rows="2" maxlength="500" placeholder="Specify any other data you collect"></textarea>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="dataUsage" class="form-label">Purpose of Data Collection *</label>
                                 <div class="form-text mb-2">Why do you collect this data?</div>
-                                <textarea class="form-control" id="dataUsage" rows="3" required placeholder="e.g., To provide our services, process payments, improve user experience"></textarea>
+                                <textarea class="form-control" id="dataUsage" rows="3" maxlength="1000" required placeholder="e.g., To provide our services, process payments, improve user experience"></textarea>
                                 <div class="invalid-feedback">Please explain how you use the collected data.</div>
                             </div>
                             <div class="mb-3">
@@ -124,12 +121,11 @@
                                     <option value="legal-requirement">As required by law</option>
                                 </select>
                                 <div class="mt-2 storage-details d-none">
-                                    <input type="text" class="form-control" id="storageDetails" placeholder="Specify storage duration (e.g., 2 years)">
+                                    <input type="text" class="form-control" id="storageDetails" pattern="[0-9a-zA-Z\s-]+" oninput="this.value = this.value.replace(/[^0-9a-zA-Z\s-]/g, '')" maxlength="50" placeholder="Specify storage duration (e.g., 2 years)">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Section: Data Sharing -->
                     <div class="section-divider mb-4"><span>Data Sharing</span></div>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -146,7 +142,7 @@
                             </div>
                             <div class="mb-3 third-party-details d-none">
                                 <label for="thirdPartyDetails" class="form-label">Specify Third Parties</label>
-                                <textarea class="form-control" id="thirdPartyDetails" rows="2" placeholder="List specific third parties or categories"></textarea>
+                                <textarea class="form-control" id="thirdPartyDetails" rows="2" maxlength="500" placeholder="List specific third parties or categories"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="internationalTransfers" class="form-label">International Data Transfers</label>
@@ -159,7 +155,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Section: User Rights & Contact -->
                     <div class="section-divider mb-4"><span>User Rights & Contact</span></div>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -200,21 +195,20 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="contactEmail" class="form-label">Contact Email for Privacy Concerns *</label>
-                                    <input type="email" class="form-control" id="contactEmail" required>
+                                    <input type="email" class="form-control" id="contactEmail" maxlength="100" required>
                                     <div class="invalid-feedback">Please provide a valid email address.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="contactPhone" class="form-label">Contact Phone (Optional)</label>
-                                    <input type="tel" class="form-control" id="contactPhone">
+                                    <input type="tel" class="form-control" id="contactPhone" pattern="[0-9]*" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Numbers only">
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="contactAddress" class="form-label">Contact Address (Optional)</label>
-                                <textarea class="form-control" id="contactAddress" rows="2"></textarea>
+                                <textarea class="form-control" id="contactAddress" rows="2" maxlength="300"></textarea>
                             </div>
                         </div>
                     </div>
-                    <!-- Section: Additional Options -->
                     <div class="section-divider mb-4"><span>Additional Options</span></div>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -244,7 +238,7 @@
                                     </div>
                                 </div>
                                 <div class="mt-2 other-compliance-details d-none">
-                                    <input type="text" class="form-control" id="otherComplianceDetails" placeholder="Specify other regulations (e.g., LGPD, APPI)">
+                                    <input type="text" class="form-control" id="otherComplianceDetails" pattern="[A-Za-z0-9\s,.-]+" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s,.-]/g, '')" maxlength="100" placeholder="Specify other regulations (e.g., LGPD, APPI)">
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -261,7 +255,6 @@
                     </div>
                 </form>
             </div>
-            <!-- Result Column (Right Side) -->
             <div class="col-lg-6 result-column">
                 <div class="sticky-top pt-3">
                     <div id="loadingIndicator" class="d-none text-center my-4">
